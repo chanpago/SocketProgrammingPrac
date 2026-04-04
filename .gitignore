@@ -1,0 +1,33 @@
+# Visual Studio cache/options
+.vs/
+*.suo
+*.user
+*.VC.db
+*.VC.opendb
+
+# IntelliSense/PCH cache
+ipch/
+*.ipch
+
+# Build output directories
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+# C/C++ intermediate and binary files
+*.obj
+*.o
+*.ilk
+*.idb
+*.pdb
+*.log
+*.tlog
+*.recipe
+*.lastbuildstate
+*.exe
+*.dll
+*.lib
+*.exp
