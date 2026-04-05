@@ -31,3 +31,9 @@ x86/
 *.dll
 *.lib
 *.exp
+
+# Claude Code local settings
+.claude/
+
+# Local documentation notes
+docs/
