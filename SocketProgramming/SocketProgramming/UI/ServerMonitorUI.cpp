@@ -64,6 +64,7 @@ void ServerMonitorUI::BeginFrame()
 
 void ServerMonitorUI::Render(const SocketServer& server)
 {
+    // UI 스레드는 네트워크를 직접 처리하지 않고, 서버 스레드가 만든 상태 snapshot만 읽어서 화면에 보여준다.
     const ServerSnapshot snapshot = server.GetSnapshot();
 
     ImGui::Begin("Socket Server Monitor");
@@ -73,9 +74,11 @@ void ServerMonitorUI::Render(const SocketServer& server)
     ImGui::Text("Status: %s", snapshot.status.c_str());
     ImGui::Text("Listening: %s", snapshot.listening ? "Yes" : "No");
     ImGui::Text("Initialized: %s", snapshot.initialized ? "Yes" : "No");
+    ImGui::Text("Active Clients: %d", snapshot.activeClients);
     ImGui::Text("Total Connections: %d", snapshot.totalConnections);
+    ImGui::Text("Total Messages: %d", snapshot.totalMessages);
     ImGui::Text("Last Socket Error: %d", snapshot.lastSocketError);
-    ImGui::TextWrapped("Open http://127.0.0.1:9000/ in a browser to test the server.");
+    ImGui::TextWrapped("Connect with telnet 127.0.0.1 9000 or nc 127.0.0.1 9000, then send one line per chat message.");
 
     if (ImGui::Button("Clear Logs"))
     {
@@ -83,6 +86,23 @@ void ServerMonitorUI::Render(const SocketServer& server)
     }
 
     ImGui::Separator();
+    ImGui::Text("Connected Clients");
+    ImGui::BeginChild("ClientList", ImVec2(0.0f, 120.0f), true);
+    if (snapshot.clients.empty())
+    {
+        ImGui::TextDisabled("No connected clients");
+    }
+    else
+    {
+        for (const ClientSnapshot& client : snapshot.clients)
+        {
+            ImGui::BulletText("%s (%s)", client.name.c_str(), client.endpoint.c_str());
+        }
+    }
+    ImGui::EndChild();
+
+    ImGui::Separator();
+    ImGui::Text("Chat / Event Logs");
     ImGui::BeginChild("ServerLogs", ImVec2(0.0f, 0.0f), true);
     for (const std::string& log : snapshot.logs)
     {

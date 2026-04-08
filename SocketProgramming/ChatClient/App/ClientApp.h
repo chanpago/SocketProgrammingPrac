@@ -2,27 +2,25 @@
 
 #include <windows.h>
 
-#include <array>
-
+#include "Network/ChatClientConnection.h"
 #include "Renderer/D3D11Context.h"
-#include "Server/SocketServer.h"
-#include "UI/ServerMonitorUI.h"
+#include "UI/ChatClientUI.h"
 
-class MainApp
+class ClientApp
 {
 public:
-    MainApp() = default;
-    ~MainApp() = default;
+    explicit ClientApp(int clientIndex = 0);
+    ~ClientApp() = default;
 
     int Run(HINSTANCE instanceHandle, int showCommand);
 
 private:
     bool Initialize(HINSTANCE instanceHandle, int showCommand);
+    void UpdateWindowTitle() const;
+    std::wstring GetWindowTitle() const;
     void Shutdown();
     bool RegisterWindowClass(HINSTANCE instanceHandle);
     bool CreateMainWindow(HINSTANCE instanceHandle, int showCommand);
-    bool LaunchChatClient();
-    void CloseChatClientHandles();
     int RunMainLoop();
 
     static LRESULT CALLBACK WndProcStatic(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam);
@@ -31,8 +29,8 @@ private:
 private:
     HWND windowHandle_ = nullptr;
     HINSTANCE instanceHandle_ = nullptr;
-    std::array<PROCESS_INFORMATION, 2> chatClientProcessInfos_ = {};
-    SocketServer server_;
+    int clientIndex_ = 0;
+    ChatClientConnection connection_;
     D3D11Context d3d11Context_;
-    ServerMonitorUI serverMonitorUI_;
+    ChatClientUI chatClientUI_;
 };

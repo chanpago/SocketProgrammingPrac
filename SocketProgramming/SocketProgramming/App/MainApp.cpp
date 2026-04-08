@@ -1,8 +1,15 @@
 #include "App/MainApp.h"
 
+#include <chrono>
+#include <filesystem>
+#include <thread>
+
 namespace
 {
     constexpr wchar_t kWindowClassName[] = L"SocketProgrammingImGuiWindow";
+    constexpr int kServerStartWaitIterations = 100;
+    constexpr auto kServerStartWaitInterval = std::chrono::milliseconds(20);
+    constexpr size_t kAutoLaunchClientCount = 2;
 }
 
 int MainApp::Run(HINSTANCE instanceHandle, int showCommand)
@@ -20,6 +27,8 @@ int MainApp::Run(HINSTANCE instanceHandle, int showCommand)
 
 bool MainApp::Initialize(HINSTANCE instanceHandle, int showCommand)
 {
+    // 앱 인스턴스 핸들을 저장한 뒤, 창 등록 -> 창 생성 -> DX11 초기화 -> ImGui UI 초기화 순서로 진행한다.
+    // 여기까지는 네트워크 처리가 아니라 "서버 모니터 창을 띄우기 위한 준비 단계"다.
     instanceHandle_ = instanceHandle;
 
     if (!RegisterWindowClass(instanceHandle))
@@ -42,12 +51,30 @@ bool MainApp::Initialize(HINSTANCE instanceHandle, int showCommand)
         return false;
     }
 
+    // 실제 TCP 서버 루프는 UI 스레드가 아니라 별도의 워커 스레드에서 돈다.
     server_.Start();
+
+    // Start()는 스레드만 시작하므로, 바로 클라이언트를 띄우면 아직 listen 상태가 아닐 수 있다.
+    // 그래서 listening=true가 될 때까지 잠깐 폴링하면서 기다린다.
+    for (int iteration = 0; iteration < kServerStartWaitIterations; ++iteration)
+    {
+        if (server_.GetSnapshot().listening)
+        {
+            break;
+        }
+
+        std::this_thread::sleep_for(kServerStartWaitInterval);
+    }
+
+    // 여기서 ChatClient 소스의 main/WinMain을 직접 호출하는 것이 아니라,
+    // 이미 빌드되어 있는 ChatClient.exe를 별도 프로세스로 실행한다.
+    LaunchChatClient();
     return true;
 }
 
 void MainApp::Shutdown()
 {
+    CloseChatClientHandles();
     server_.Stop();
     serverMonitorUI_.Shutdown();
     d3d11Context_.Shutdown();
@@ -99,6 +126,75 @@ bool MainApp::CreateMainWindow(HINSTANCE instanceHandle, int showCommand)
     ShowWindow(windowHandle_, showCommand);
     UpdateWindow(windowHandle_);
     return true;
+}
+
+bool MainApp::LaunchChatClient()
+{
+    // 이미 실행한 클라이언트 프로세스 핸들이 남아 있으면 중복 실행하지 않는다.
+    for (const PROCESS_INFORMATION& processInfo : chatClientProcessInfos_)
+    {
+        if (processInfo.hProcess || processInfo.hThread)
+        {
+            return true;
+        }
+    }
+
+    wchar_t modulePath[MAX_PATH] = {};
+    const DWORD modulePathLength = GetModuleFileNameW(nullptr, modulePath, MAX_PATH);
+    if (modulePathLength == 0 || modulePathLength == MAX_PATH)
+    {
+        return false;
+    }
+
+    const std::filesystem::path executableDirectory = std::filesystem::path(modulePath).parent_path();
+    // 서버 exe와 같은 출력 폴더에 빌드된 ChatClient.exe를 찾아서 실행한다.
+    const std::filesystem::path chatClientPath = executableDirectory / L"ChatClient.exe";
+    if (!std::filesystem::exists(chatClientPath))
+    {
+        return false;
+    }
+
+    STARTUPINFOW startupInfo = {};
+    startupInfo.cb = sizeof(startupInfo);
+
+    for (size_t index = 0; index < kAutoLaunchClientCount; ++index)
+    {
+        // 각 클라이언트는 별도 프로세스로 뜨고, 구분을 위해 client index 인자를 함께 넘긴다.
+        std::wstring commandLine = L"\"" + chatClientPath.wstring() + L"\" --client-index=" + std::to_wstring(index + 1);
+        PROCESS_INFORMATION processInfo = {};
+        if (!CreateProcessW(nullptr, commandLine.data(), nullptr, nullptr, FALSE, 0, nullptr, executableDirectory.c_str(), &startupInfo, &processInfo))
+        {
+            CloseChatClientHandles();
+            return false;
+        }
+
+        chatClientProcessInfos_[index] = processInfo;
+    }
+
+    return true;
+}
+
+void MainApp::CloseChatClientHandles()
+{
+    // 여기서는 클라이언트 프로그램 자체를 강제 종료하는 것이 아니라,
+    // 서버가 들고 있던 프로세스/스레드 핸들만 정리한다.
+    for (PROCESS_INFORMATION& processInfo : chatClientProcessInfos_)
+    {
+        if (processInfo.hThread)
+        {
+            CloseHandle(processInfo.hThread);
+            processInfo.hThread = nullptr;
+        }
+
+        if (processInfo.hProcess)
+        {
+            CloseHandle(processInfo.hProcess);
+            processInfo.hProcess = nullptr;
+        }
+
+        processInfo.dwProcessId = 0;
+        processInfo.dwThreadId = 0;
+    }
 }
 
 int MainApp::RunMainLoop()
