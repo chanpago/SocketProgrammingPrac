@@ -6,7 +6,24 @@
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
 
+#include <filesystem>
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam);
+
+namespace
+{
+    std::string GetProjectFontPath()
+    {
+        wchar_t modulePath[MAX_PATH] = {};
+        if (GetModuleFileNameW(nullptr, modulePath, MAX_PATH) == 0)
+        {
+            return {};
+        }
+
+        const std::filesystem::path fontPath = std::filesystem::path(modulePath).parent_path() / L".." / L".." / L"Fonts" / L"malgun.ttf";
+        return fontPath.lexically_normal().string();
+    }
+}
 
 ChatClientUI::~ChatClientUI()
 {
@@ -26,6 +43,17 @@ bool ChatClientUI::Initialize(HWND windowHandle, ID3D11Device* device, ID3D11Dev
 
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigWindowsMoveFromTitleBarOnly = true;
+
+    const std::string fontPath = GetProjectFontPath();
+    if (!fontPath.empty())
+    {
+        ImFontConfig fontConfig;
+        fontConfig.OversampleH = 1;
+        fontConfig.OversampleV = 1;
+        fontConfig.PixelSnapH = true;
+        static const ImWchar koreanRanges[] = { 0x0020, 0x00FF, 0x3131, 0x3163, 0xAC00, 0xD7A3, 0 };
+        io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 18.0f, &fontConfig, koreanRanges);
+    }
 
     if (!ImGui_ImplWin32_Init(windowHandle))
     {
