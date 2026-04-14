@@ -17,6 +17,8 @@ public:
 
     ID3D11Device* GetDevice() const { return device_; }
     ID3D11DeviceContext* GetDeviceContext() const { return deviceContext_; }
+    float GetViewportWidth() const { return viewport_.Width; }
+    float GetViewportHeight() const { return viewport_.Height; }
 
 private:
     void CreateRenderTarget();
@@ -27,4 +29,5 @@ private:
     ID3D11DeviceContext* deviceContext_ = nullptr;
     IDXGISwapChain* swapChain_ = nullptr;
     ID3D11RenderTargetView* mainRenderTargetView_ = nullptr;
+    D3D11_VIEWPORT viewport_ = {};
 };

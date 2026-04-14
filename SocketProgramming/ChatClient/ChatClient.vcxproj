@@ -76,6 +76,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)SocketProgramming;$(SolutionDir)SocketProgramming\ThirdParty;$(SolutionDir)SocketProgramming\ThirdParty\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4838;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -93,6 +94,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)SocketProgramming;$(SolutionDir)SocketProgramming\ThirdParty;$(SolutionDir)SocketProgramming\ThirdParty\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4838;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -108,6 +110,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)SocketProgramming;$(SolutionDir)SocketProgramming\ThirdParty;$(SolutionDir)SocketProgramming\ThirdParty\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4838;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,6 +128,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)SocketProgramming;$(SolutionDir)SocketProgramming\ThirdParty;$(SolutionDir)SocketProgramming\ThirdParty\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4838;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -136,6 +140,7 @@
     <ClCompile Include="ChatClient.cpp" />
     <ClCompile Include="App\ClientApp.cpp" />
     <ClCompile Include="Network\ChatClientConnection.cpp" />
+    <ClCompile Include="Renderer\CircleRenderer.cpp" />
     <ClCompile Include="UI\ChatClientUI.cpp" />
     <ClCompile Include="..\SocketProgramming\Renderer\D3D11Context.cpp" />
     <ClCompile Include="..\SocketProgramming\ThirdParty\ImGui\imgui.cpp" />
@@ -148,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="App\ClientApp.h" />
     <ClInclude Include="Network\ChatClientConnection.h" />
+    <ClInclude Include="Renderer\CircleRenderer.h" />
     <ClInclude Include="UI\ChatClientUI.h" />
     <ClInclude Include="..\SocketProgramming\Renderer\D3D11Context.h" />
     <ClInclude Include="..\SocketProgramming\ThirdParty\ImGui\imconfig.h" />
@@ -158,6 +164,9 @@
     <ClInclude Include="..\SocketProgramming\ThirdParty\ImGui\imstb_rectpack.h" />
     <ClInclude Include="..\SocketProgramming\ThirdParty\ImGui\imstb_textedit.h" />
     <ClInclude Include="..\SocketProgramming\ThirdParty\ImGui\imstb_truetype.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Shaders\Circle2D.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

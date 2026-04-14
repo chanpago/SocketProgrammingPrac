@@ -2,6 +2,22 @@
 
 #include <array>
 
+namespace
+{
+    D3D11_VIEWPORT CreateViewport(float width, float height)
+    {
+        D3D11_VIEWPORT viewport = {};
+        viewport.TopLeftX = 0.0f;
+        viewport.TopLeftY = 0.0f;
+        viewport.Width = width;
+        viewport.Height = height;
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        return viewport;
+    }
+}
+
+
 D3D11Context::~D3D11Context()
 {
     Shutdown();
@@ -54,6 +70,10 @@ bool D3D11Context::Initialize(HWND windowHandle)
     }
 
     CreateRenderTarget();
+
+    RECT clientRect = {};
+    GetClientRect(windowHandle, &clientRect);
+    viewport_ = CreateViewport(static_cast<float>(clientRect.right - clientRect.left), static_cast<float>(clientRect.bottom - clientRect.top));
     return true;
 }
 
@@ -88,11 +108,13 @@ void D3D11Context::Resize(UINT width, UINT height)
     CleanupRenderTarget();
     swapChain_->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
     CreateRenderTarget();
+    viewport_ = CreateViewport(static_cast<float>(width), static_cast<float>(height));
 }
 
 void D3D11Context::BeginFrame(const float clearColor[4])
 {
     deviceContext_->OMSetRenderTargets(1, &mainRenderTargetView_, nullptr);
+    deviceContext_->RSSetViewports(1, &viewport_);
     deviceContext_->ClearRenderTargetView(mainRenderTargetView_, clearColor);
 }
 

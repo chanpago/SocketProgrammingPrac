@@ -51,6 +51,11 @@ bool ClientApp::Initialize(HINSTANCE instanceHandle, int showCommand)
         return false;
     }
 
+    if (!circleRenderer_.Initialize(d3d11Context_.GetDevice()))
+    {
+        return false;
+    }
+
     connection_.Connect();
     return true;
 }
@@ -58,6 +63,7 @@ bool ClientApp::Initialize(HINSTANCE instanceHandle, int showCommand)
 void ClientApp::Shutdown()
 {
     connection_.Disconnect();
+    circleRenderer_.Shutdown();
     chatClientUI_.Shutdown();
     d3d11Context_.Shutdown();
 
@@ -156,6 +162,7 @@ int ClientApp::RunMainLoop()
 
         const float clearColor[4] = { 0.08f, 0.08f, 0.10f, 1.00f };
         d3d11Context_.BeginFrame(clearColor);
+        circleRenderer_.Render(d3d11Context_.GetDeviceContext(), d3d11Context_.GetViewportWidth(), d3d11Context_.GetViewportHeight());
         chatClientUI_.EndFrame();
         d3d11Context_.EndFrame();
     }
