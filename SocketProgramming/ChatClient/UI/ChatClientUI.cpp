@@ -66,6 +66,9 @@ void ChatClientUI::Render(ChatClientConnection& connection, int clientIndex)
 {
     ChatClientSnapshot snapshot = connection.GetSnapshot();
 
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 12.0f, viewport->WorkPos.y + 12.0f), ImGuiCond_Appearing);
+    ImGui::SetNextWindowSize(ImVec2(226.0f, viewport->WorkSize.y - 24.0f), ImGuiCond_Appearing);
     ImGui::Begin("TCP Chat Client");
     ImGui::Text("Renderer: DirectX 11");
     ImGui::Text("ImGui backend: Win32 + DX11");
@@ -116,7 +119,7 @@ void ChatClientUI::Render(ChatClientConnection& connection, int clientIndex)
 
     ImGui::Separator();
     ImGui::Text("Chat Logs");
-    ImGui::BeginChild("ClientLogs", ImVec2(0.0f, -ImGui::GetFrameHeightWithSpacing() * 2.5f), true);
+    ImGui::BeginChild("ClientLogs", ImVec2(0.0f, -ImGui::GetFrameHeightWithSpacing() * 4.5f), true);
     for (const std::string& log : snapshot.logs)
     {
         ImGui::TextWrapped("%s", log.c_str());

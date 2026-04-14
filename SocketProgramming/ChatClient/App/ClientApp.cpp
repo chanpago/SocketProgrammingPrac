@@ -93,7 +93,7 @@ bool ClientApp::CreateMainWindow(HINSTANCE instanceHandle, int showCommand)
         WS_OVERLAPPEDWINDOW,
         140,
         140,
-        900,
+        1280,
         600,
         nullptr,
         nullptr,
